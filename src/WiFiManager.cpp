@@ -8,14 +8,9 @@ void connectToWiFi() {
     WiFi.begin(ssid, password);
 
     Serial.println("\nConnecting");
-    pinMode(LED_BUILTIN, OUTPUT);
-    digitalWrite(LED_BUILTIN, HIGH);
-
     while(WiFi.status() != WL_CONNECTED) {
-        digitalWrite(LED_BUILTIN, LOW);
         Serial.print(".");
         delay(100);
-        digitalWrite(LED_BUILTIN, HIGH);
     }
 
     Serial.println("\nConnected to the WiFi network");

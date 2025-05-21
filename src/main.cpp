@@ -23,9 +23,6 @@ void setup() {
 
   //this gets the time from the API
   configTime(UTC_OFFSET, UTC_OFFSET_DST, NTP_SERVER);
-
-  // Turns off the LED after setup is complete
-  digitalWrite(LED_BUILTIN, HIGH);
 }
 
 void loop() {
