@@ -55,3 +55,16 @@ We will be using an [I2C](https://en.wikipedia.org/wiki/I%C2%B2C) connection for
 <img src="images/circuit_image.png" alt="Wiring Diagram" width="600"/>  
 
 [Wiring Diagram](https://app.cirkitdesigner.com/project/1110f6d5-ce90-4a6f-82fb-755107a45a04)
+
+## Display layout and elements
+
+The elements which we will display are:
+- Time (digital)
+- Time (analog)
+- Date
+
+The layout was done using a webapp called [Lopaka](https://lopaka.app/). There is a free tier to use, however it's very limited. Most likely though it will be more than enough for doing a project of this size. There is the option to selfhost the app, if you don't want to pay for the premium tier, since it's completely open source. Go check it out!
+
+We decided on this layout, so we would have some space below the data thats being shown, to indicate which buttons do what later down the line.
+
+<img src="images/display_layout.png" alt="Display Layout" width="512"/>  
