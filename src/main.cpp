@@ -46,13 +46,13 @@ void loop() {
 void wifiAndTimeTask(void * parameter) { // FreeRTOS allows passing parameter to the task when created. Even though we aren't passing any parameters, this must be included because FreeRTOS expects the signature
   for (;;) { // forever loop, its the same as using while(true)
     bool connected = checkWiFiAndReconnect();
-    
-    // if the wifi is connected, call the api to update the time
-    if (connected) {
-      configTime(utcOffset, dstOffset, NTP_SERVER);
-    }
+    Serial.println("\nWiFi checked");
 
-    Serial.println("Time synced and WiFi checked"); // for some reason this isn't always printing the whole string
+    // if the wifi is connected, call the api to update the time
+    if (!connected) {
+      configTime(utcOffset, dstOffset, NTP_SERVER);
+      Serial.println("\nTime synced");
+    }
 
     vTaskDelay(10000 / portTICK_PERIOD_MS); // I have this set to wait 10 seconds for testing, but we can change it to update at any interval we want
   }
