@@ -49,7 +49,7 @@ void wifiAndTimeTask(void * parameter) { // FreeRTOS allows passing parameter to
     Serial.println("\nWiFi checked");
 
     // if the wifi is connected, call the api to update the time
-    if (!connected) {
+    if (connected) {
       configTime(utcOffset, dstOffset, NTP_SERVER);
       Serial.println("\nTime synced");
     }
