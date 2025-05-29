@@ -48,7 +48,8 @@ void wifiAndTimeTask(void * parameter) { // FreeRTOS allows passing parameter to
     checkWiFiAndReconnect();
     configTime(utcOffset, dstOffset, NTP_SERVER);
 
-    Serial.println("Time synced and WiFi checked");
+    Serial.println("Time synced and WiFi checked"); // for some reason this isn't always printing the whole string
+    
     vTaskDelay(10000 / portTICK_PERIOD_MS); // I have this set to wait 10 seconds for testing, but we can change it to update at any interval we want
   }
 }
