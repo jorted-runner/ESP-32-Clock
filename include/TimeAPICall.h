@@ -6,10 +6,11 @@
 #define NTP_SERVER "time.google.com"
 //this will define the timezone
 //the offset is in seconds (ie if your Timezone is UTC+1 you need to put 3600 here)
-int utcOffset = 0;
+// int utcOffset = 0;
+
 //this will define whether or not there is daylight savings
 //again this offset is in seconds. During the summer put 3600 here, and 0 in the winter
-int dstOffset = 0;
+// int dstOffset = 0;
 
 
 //here are all the functions declarations

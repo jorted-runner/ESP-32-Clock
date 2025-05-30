@@ -2,6 +2,7 @@
 #include "WiFiManager.h"
 #include "TimeAPICall.h"
 #include "OutputOnDisplay.h"
+#include "Secrets.h"
 #include <U8g2lib.h>
 
 void wifiAndTimeTask(void * parameter);
@@ -17,7 +18,7 @@ void setup() {
   delay(1000);
   
   // Connect to WiFi using the WiFiManager module  
-  connectToWiFi();
+  connectToWiFi(ssid, password);
 
   //this gets the time from the API
   //utcOffset is set to 0 at the start, it is there to set your timezone
