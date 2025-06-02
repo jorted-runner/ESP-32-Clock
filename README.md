@@ -13,16 +13,31 @@
 -Michael Scott
 -->
 
+Simple internet-connected clock using an ESP32 (Xiao ESP32 S3), pulling time via NTP, and displaying it on a SH1106 OLED using the U8g2 library.
+
 ## Table of Contents
 
 - [The Idea](#the-idea)
+- [Installation](#installation)
 - [The Xiao ESP32](#the-xiao-esp32)
 - [The Screen](#the-screen)
 - [The Pinout and Wiring Diagram](#the-pinout-and-wiring-diagram)
+- [Display layout and elements](#display-layout-and-elements)
 
 ## The Idea
 
 The idea is simple. We want to hook up a microcontroller to the world wide web. Here we will call an API to get the accurate time. This will then be output onto a small screen via an I2C connection.
+
+## Installation
+
+We are using [PlatformIO](https://platformio.org/) as a plugin for VSCode. You could also use the [Arduino IDE](https://www.arduino.cc/en/software/).  
+Clone the repository to your local machine.  
+Update the Secrets.h file according to your Wifi Connection  
+Upload the code to your ESP32 via USB cable  
+
+These are the libraries being used:
+- [U8g2](https://github.com/olikraus/u8g2/wiki)
+- [WifiManager](https://github.com/aromprg/WiFiManager)
 
 ## The Xiao ESP32
 
@@ -66,5 +81,7 @@ The elements which we will display are:
 The layout was done using a webapp called [Lopaka](https://lopaka.app/). There is a free tier to use, however it's very limited. Most likely though it will be more than enough for doing a project of this size. There is the option to selfhost the app, if you don't want to pay for the premium tier, since it's completely open source. Go check it out!
 
 We decided on this layout, so we would have some space below the data thats being shown, to indicate which buttons do what later down the line.
+
+The month is saved in base zero, meaning we need to get it from the RTC and then add 1 to it, in order for it to be displayed correctly
 
 <img src="images/display_layout.png" alt="Display Layout" width="512"/>  
