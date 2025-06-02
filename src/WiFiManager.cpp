@@ -1,9 +1,8 @@
 #include <WiFi.h>
-#include "Secrets.h"
 #include "WiFiManager.h"
 #include <Arduino.h>
 
-void connectToWiFi() {
+void connectToWiFi(const char* ssid, const char* password) {
     WiFi.mode(WIFI_STA);
     WiFi.setAutoReconnect(true);
     WiFi.begin(ssid, password);
