@@ -35,6 +35,26 @@ void sendTimeToDisplayBuffer(){
     u8g2.drawStr(59, 20, timeStr);
 }
 
+//will get date from rtc and send it to the buffer, ready to be printed out on the display, once outputOnDisplay function is called
+void sendDateToDisplayBuffer(){
+    struct tm timeinfo;
+    if (!getLocalTime(&timeinfo)) {
+        return;
+    }
+
+    //this part is used to take the timeinfo, and convert the days and months to an array of chars
+    //this is done, since the u8g2.drawStr method is expecting it to be of that type.
+    char dateStr[6]; //DD/MM + null terminator
+    snprintf(dateStr, sizeof(dateStr), "%02d/%02d", timeinfo.tm_mday, timeinfo.tm_mon + 1); //the month needs +1 since its 0 based
+
+
+    //here we set the font
+    u8g2.setFont(u8g2_font_profont22_tr);
+
+    //this is where we actually write the date to the buffer
+    u8g2.drawStr(59, 44, dateStr);
+}
+
 //this function sends all stored things in the buffer to the display
 void outputOnDisplay(){
     u8g2.sendBuffer();

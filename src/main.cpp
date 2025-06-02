@@ -41,6 +41,7 @@ void setup() {
 void loop() {
   prepareDisplay();
   sendTimeToDisplayBuffer(); 
+  sendDateToDisplayBuffer();
   outputOnDisplay();
 }
 
