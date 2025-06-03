@@ -16,6 +16,11 @@ const int backwardButtonPin = 3;
 
 const int THRESHOLD = 35000;
 
+const unsigned long debounceDelay = 250;
+unsigned long lastEnterPress = 0;
+unsigned long lastForwardPress = 0;
+unsigned long lastBackwardPress = 0;
+
 void setup() {
   //this establishes a serial connection with the PC. This makes debugging a lot easier
   Serial.begin(115200);
@@ -60,27 +65,36 @@ void setup() {
 }
 
 void loop() {
-  touch_value_t enterButtonTouchValue = touchRead(enterButtonPin);
-  touch_value_t forwardButtonTouchValue = touchRead(forwardButtonPin);
-  touch_value_t backwardButtonTouchValue = touchRead(backwardButtonPin);
-
   prepareClockDisplayArea();
   sendTimeToDisplayBuffer(); 
   sendDateToDisplayBuffer();
   sendAnalogTimeToDisplayBuffer();
   
-  if (enterButtonTouchValue > THRESHOLD) {
+  unsigned long currentTime = millis();
+
+  touch_value_t enterButtonTouchValue = touchRead(enterButtonPin);
+  touch_value_t forwardButtonTouchValue = touchRead(forwardButtonPin);
+  touch_value_t backwardButtonTouchValue = touchRead(backwardButtonPin);
+
+  if (enterButtonTouchValue > THRESHOLD && currentTime - lastEnterPress > debounceDelay) {
+      Serial.println("Enter Button Pressed");
       enterPressed();
+      lastEnterPress = currentTime;
   }
-  if (forwardButtonTouchValue > THRESHOLD) {
+
+  if (forwardButtonTouchValue > THRESHOLD && currentTime - lastForwardPress > debounceDelay) {
+      Serial.println("Forward Button Pressed");
       forwardMenu();
-  }    
-  if (backwardButtonTouchValue > THRESHOLD) {
+      lastForwardPress = currentTime;
+  }
+
+  if (backwardButtonTouchValue > THRESHOLD && currentTime - lastBackwardPress > debounceDelay) {
+      Serial.println("Backward Button Pressed");
       backwardMenu();
+      lastBackwardPress = currentTime;
   }
 
   outputOnDisplay();
-  delay(250);
 
 }
 
