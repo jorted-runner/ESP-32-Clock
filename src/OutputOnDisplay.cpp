@@ -95,7 +95,15 @@ void sendAnalogTimeToDisplayBuffer(){
     
 }
 
+void prepareClockDisplayArea() {
+    u8g2.setFontMode(1);
+    u8g2.setBitmapMode(1);
 
+    // Clear only the top portion (top 48 pixels)
+    u8g2.setDrawColor(0);                // Erase mode
+    u8g2.drawBox(0, 0, 128, 48);         // x, y, width, height
+    u8g2.setDrawColor(1);                // Restore draw mode
+}
 
 //this function sends all stored things in the buffer to the display
 void outputOnDisplay(){

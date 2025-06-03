@@ -26,6 +26,7 @@ void sendTimeToDisplayBuffer();
 void sendDateToDisplayBuffer();
 void sendAnalogTimeToDisplayBuffer();
 void outputOnDisplay();
+void prepareClockDisplayArea();
 
 //helper functions
 void drawClockHands(float, int, int, int);

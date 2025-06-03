@@ -27,9 +27,14 @@ void setup() {
 
   //initialize the I2C connection with the display
   u8g2.begin();
+  
 
   //the delay here is to make sure the connection is established and no communication starts without the PC being ready for it
   delay(1000);
+
+
+  prepareDisplay();
+
   
   // Connect to WiFi using the WiFiManager module  
   connectToWiFi(ssid, password);
@@ -59,7 +64,7 @@ void loop() {
   touch_value_t forwardButtonTouchValue = touchRead(forwardButtonPin);
   touch_value_t backwardButtonTouchValue = touchRead(backwardButtonPin);
 
-  prepareDisplay();
+  prepareClockDisplayArea();
   sendTimeToDisplayBuffer(); 
   sendDateToDisplayBuffer();
   sendAnalogTimeToDisplayBuffer();
