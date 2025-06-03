@@ -16,7 +16,7 @@ const int backwardButtonPin = 3;
 
 const int THRESHOLD = 35000;
 
-const unsigned long debounceDelay = 250;
+const unsigned long debounceDelay = 350;
 unsigned long lastEnterPress = 0;
 unsigned long lastForwardPress = 0;
 unsigned long lastBackwardPress = 0;

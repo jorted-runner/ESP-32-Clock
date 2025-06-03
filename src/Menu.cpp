@@ -20,7 +20,7 @@ void createInitialMenu() {
 void enterPressed() {
     if (!MENU_ENTERED) {
         MENU_ENTERED = true;
-        enterMenu();
+        displayMenu();
     } else {
         handleSelection();
     }
@@ -41,7 +41,7 @@ void handleSelection() {
     } 
 }
 
-void enterMenu() {
+void displayMenu() {
     u8g2.setFont(u8g2_font_profont10_tr);
     clearPreviousMenuText();
     int x = 6;
@@ -66,7 +66,7 @@ void forwardMenu() {
     } else {
         MENU_INDEX += 1;
     }
-    enterMenu();
+    displayMenu();
 }
 
 void backwardMenu() {
@@ -75,13 +75,13 @@ void backwardMenu() {
     } else {
         MENU_INDEX -= 1;
     }
-    enterMenu();
+    displayMenu();
 }
 
 void clearPreviousMenuText() {
     u8g2.setDrawColor(0);
     // x, y, w, h
-    u8g2.drawBox(0, 48, 128, 16); // Clear previous text (adjust width/height as needed)
+    u8g2.drawBox(0, 48, 128, 16); // Clear previous text
     u8g2.setDrawColor(1);
 
 }

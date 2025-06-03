@@ -3,7 +3,7 @@
 void createInitialMenu();
 void enterPressed();
 void handleSelection();
-void enterMenu();
+void displayMenu();
 void forwardMenu();
 void backwardMenu();
 void clearPreviousMenuText();
