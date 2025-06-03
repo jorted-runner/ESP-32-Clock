@@ -55,7 +55,53 @@ void sendDateToDisplayBuffer(){
     u8g2.drawStr(59, 44, dateStr);
 }
 
+void sendAnalogTimeToDisplayBuffer(){
+    struct tm timeinfo;
+    if (!getLocalTime(&timeinfo)) {
+        return;
+    }
+
+    u8g2.setFontMode(1);
+    u8g2.setBitmapMode(1);
+
+    u8g2.drawEllipse(CENTER_ANALOG_CLOCK_X, CENTER_ANALOG_CLOCK_Y, RADIUS_ANALOG_CLOCK, RADIUS_ANALOG_CLOCK);
+
+
+    //HOUR HAND
+    //first we need to get the minutes in seconds, this is done so the minute hand isnt only moving once a minute
+    int totalHoursSeconds = ((timeinfo.tm_hour * 60 * 60) + ((timeinfo.tm_min * 60) + timeinfo.tm_sec));
+    //next we need to calculate the degrees from these seconds
+    float angleHoursDeg = (totalHoursSeconds / (12 * 3600.0)) * 360.0;
+    //we need to convert these degrees into a radiant so it works with the sin() and cos() functions
+    float angleHoursRad = radians(angleHoursDeg);
+    //next we actually draw the hand
+    drawClockHands(angleHoursRad, LENGTH_HOUR_HAND, CENTER_ANALOG_CLOCK_X, CENTER_ANALOG_CLOCK_Y);
+
+
+    //MINUTE HAND
+    //first we need to get the minutes in seconds, this is done so the minute hand isnt only moving once a minute
+    int totalMinutesSeconds = (timeinfo.tm_min * 60) + timeinfo.tm_sec;
+    //next we need to calculate the degrees from these seconds
+    float angleMinutesDeg = (totalMinutesSeconds / 3600.0) * 360.0;
+    //we need to convert these degrees into a radiant so it works with the sin() and cos() functions
+    float angleMinutesRad = radians(angleMinutesDeg);
+    //next we actually draw the hand
+    drawClockHands(angleMinutesRad, LENGTH_MINUTE_HAND, CENTER_ANALOG_CLOCK_X, CENTER_ANALOG_CLOCK_Y);
+    
+}
+
+
+
 //this function sends all stored things in the buffer to the display
 void outputOnDisplay(){
     u8g2.sendBuffer();
+}
+
+
+//This is just a helper function for drawing the clock hands
+//time is either the minutes or the hours in seconds!, depending on which hand is supposed to be drawn
+void drawClockHands(float angle, int length, int centerX, int centerY){
+    int x1 = centerX + sin(angle) * length;  // Use sin for x
+    int y1 = centerY - cos(angle) * length;  // Use cos for y and invert for screen
+    u8g2.drawLine(centerX, centerY, x1, y1);
 }

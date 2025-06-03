@@ -42,6 +42,7 @@ void loop() {
   prepareDisplay();
   sendTimeToDisplayBuffer(); 
   sendDateToDisplayBuffer();
+  sendAnalogTimeToDisplayBuffer(); 
   outputOnDisplay();
 }
 
