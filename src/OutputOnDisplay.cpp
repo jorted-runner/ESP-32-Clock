@@ -6,7 +6,6 @@
 //In case you know which driver you are using (sh1106 or ssd1306) you just need to uncomment that one and comment
 //out the other one.
 
-U8G2_SH1106_128X64_NONAME_F_HW_I2C u8g2(U8G2_R0, SCL_PIN, SDA_PIN, RESET_PIN);
 //U8G2_SSD1306_128X32_UNIVISION_F_SW_I2C u8g2(U8G2_R0, SCL_PIN, SDA_PIN, U8X8_PIN_NONE);
 
 //this function sets all the required flags for the display, and clears whatever was on there before
