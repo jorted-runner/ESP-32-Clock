@@ -61,21 +61,25 @@ void displayMenu() {
 }
 
 void forwardMenu() {
-    if (MENU_INDEX + 1 > menuOptions.size() - 1) {
-        MENU_INDEX = 0;
-    } else {
-        MENU_INDEX += 1;
+    if (MENU_ENTERED) {
+        if (MENU_INDEX + 1 > menuOptions.size() - 1) {
+            MENU_INDEX = 0;
+        } else {
+            MENU_INDEX += 1;
+        }
+        displayMenu();
     }
-    displayMenu();
 }
 
 void backwardMenu() {
-    if (MENU_INDEX - 1 < 0) {
-        MENU_INDEX = menuOptions.size() - 1;
-    } else {
-        MENU_INDEX -= 1;
+    if (MENU_ENTERED) {
+        if (MENU_INDEX - 1 < 0) {
+            MENU_INDEX = menuOptions.size() - 1;
+        } else {
+            MENU_INDEX -= 1;
+        }
+        displayMenu();
     }
-    displayMenu();
 }
 
 void clearPreviousMenuText() {
