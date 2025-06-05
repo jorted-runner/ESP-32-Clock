@@ -5,6 +5,10 @@
 #include "Secrets.h"
 #include "Menu.h"
 #include <U8g2lib.h>
+#include <Preferences.h>
+#include "PreferencesGlobals.h"
+
+Preferences clockPrefs;
 
 U8G2_SH1106_128X64_NONAME_F_HW_I2C u8g2(U8G2_R0, SCL_PIN, SDA_PIN, RESET_PIN);
 
@@ -22,13 +26,34 @@ unsigned long lastForwardPress = 0;
 unsigned long lastBackwardPress = 0;
 
 void setup() {
+
   //this establishes a serial connection with the PC. This makes debugging a lot easier
   Serial.begin(115200);
 
+  clockPrefs.begin("clockPrefs", RO_MODE);
+
+  bool tpInit = clockPrefs.isKey("nvsInit");
+
+  if (tpInit == false) {
+    clockPrefs.end();
+    clockPrefs.begin("clockPrefs", RW_MODE);
+
+    clockPrefs.putInt("utcOff", 0);
+    clockPrefs.putInt("dstOff", 0);
+
+    clockPrefs.putBool("nvsInit", true);
+
+    clockPrefs.end();
+    clockPrefs.begin("clockPrefs", RO_MODE);
+  }
+
+  //Init the TZ_index
+  TZ_MENU_INDEX = getTzIndex();
+
   // set pins to touch mode
-    pinMode(enterButtonPin, GPIO_MODE_INPUT);
-    pinMode(forwardButtonPin, GPIO_MODE_INPUT);
-    pinMode(backwardButtonPin, GPIO_MODE_INPUT);
+  pinMode(enterButtonPin, GPIO_MODE_INPUT);
+  pinMode(forwardButtonPin, GPIO_MODE_INPUT);
+  pinMode(backwardButtonPin, GPIO_MODE_INPUT);
 
   //initialize the I2C connection with the display
   u8g2.begin();
@@ -47,6 +72,9 @@ void setup() {
   //this gets the time from the API
   //utcOffset is set to 0 at the start, it is there to set your timezone
   //dstOffset is also set to 0, it defines whether or not there is daylight savings time observed
+  int utcOffset = clockPrefs.getInt("utcOff", 0) * 3600;
+  int dstOffset = clockPrefs.getInt("dstOff", 0) * 3600;
+  clockPrefs.end();
   configTime(utcOffset, dstOffset, NTP_SERVER);
 
   createInitialMenu();
@@ -105,6 +133,10 @@ void wifiAndTimeTask(void * parameter) { // FreeRTOS allows passing parameter to
 
     // if the wifi is connected, call the api to update the time
     if (connected) {
+      clockPrefs.begin("clockPrefs", false);
+      int utcOffset = clockPrefs.getInt("utcOff", 0) * 3600;
+      int dstOffset = clockPrefs.getInt("dstOff", 0) * 3600;
+      clockPrefs.end();
       configTime(utcOffset, dstOffset, NTP_SERVER);
       Serial.println("\nTime synced");
     }

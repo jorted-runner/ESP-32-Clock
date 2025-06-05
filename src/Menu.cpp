@@ -1,19 +1,38 @@
 #include <Arduino.h>
 #include "Menu.h"
 #include "OutputOnDisplay.h"
+#include "PreferencesGlobals.h"
+#include "TimeAPICall.h"
 
 #include <iostream>
 #include <vector>
 #include <string>
+#include <algorithm>
 
 std::vector<std::string> mainMenuOptions = {"Timezone", "Timer", "Exit"};
 std::vector<int> tzMenuOptions = {-12, -11, -10, -9, -8, -7, -6, -5, -4, -3, -2, -1, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12};
 
 int MAIN_MENU_INDEX = 0;
-int TZ_MENU_INDEX = 12;
+int TZ_MENU_INDEX;
 
 bool MAIN_MENU_ENTERED = false;
 bool TZ_MENU_ENTERED = false;
+
+int getTzIndex() {
+    clockPrefs.begin("clockPrefs", false);
+    int offSet = clockPrefs.getInt("utcOff", 0);
+    clockPrefs.end();
+
+    // Search the vector for the offset retrieved from the Preferences
+    auto it = std::find(tzMenuOptions.begin(), tzMenuOptions.end(), offSet);
+
+    // If the offset is found return the index, otherwise return 12
+    if (it != tzMenuOptions.end()) {
+        return static_cast<int>(std::distance(tzMenuOptions.begin(), it));
+    } else {
+        return 12;
+    }
+}
 
 void createInitialMenu() {
 
@@ -35,6 +54,15 @@ void handleSelection() {
     if (TZ_MENU_ENTERED) {
         Serial.println(tzMenuOptions[TZ_MENU_INDEX]);
         TZ_MENU_ENTERED = false;
+        clockPrefs.begin("clockPrefs", false);
+        clockPrefs.putInt("utcOff", tzMenuOptions[TZ_MENU_INDEX]);
+
+        int utcOffset = clockPrefs.getInt("utcOff", 0) * 3600;
+        int dstOffset = clockPrefs.getInt("dstOff", 0) * 3600;
+        configTime(utcOffset, dstOffset, NTP_SERVER);
+
+        clockPrefs.end();
+
         displayMenu();
     } else {
         if (MAIN_MENU_INDEX == 0) {
@@ -111,10 +139,14 @@ void displayTimeZoneMenu() {
     }
 }
 
+void displayDstMenu() {
+    
+}
+
 void forwardMenu() {
     if (TZ_MENU_ENTERED) {
         if (TZ_MENU_INDEX + 1 > tzMenuOptions.size() - 1) {
-            TZ_MENU_INDEX = 12;
+            TZ_MENU_INDEX = tzMenuOptions.size() - 1;
         } else {
             TZ_MENU_INDEX += 1;
         }
@@ -132,8 +164,8 @@ void forwardMenu() {
 
 void backwardMenu() {
     if (TZ_MENU_ENTERED) {
-        if (TZ_MENU_INDEX - 1 < -12) {
-            TZ_MENU_INDEX = -12;
+        if (TZ_MENU_INDEX - 1 < 0) {
+            TZ_MENU_INDEX = 0;
         } else {
             TZ_MENU_INDEX -= 1;
         }
