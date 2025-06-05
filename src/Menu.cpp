@@ -6,9 +6,14 @@
 #include <vector>
 #include <string>
 
-std::vector<std::string> menuOptions = {"Timezone", "Timer", "Exit"};
-int MENU_INDEX = 0;
-bool MENU_ENTERED = false;
+std::vector<std::string> mainMenuOptions = {"Timezone", "Timer", "Exit"};
+std::vector<int> tzMenuOptions = {-12, -11, -10, -9, -8, -7, -6, -5, -4, -3, -2, -1, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12};
+
+int MAIN_MENU_INDEX = 0;
+int TZ_MENU_INDEX = 12;
+
+bool MAIN_MENU_ENTERED = false;
+bool TZ_MENU_ENTERED = false;
 
 void createInitialMenu() {
 
@@ -18,8 +23,8 @@ void createInitialMenu() {
 }
 
 void enterPressed() {
-    if (!MENU_ENTERED) {
-        MENU_ENTERED = true;
+    if (!MAIN_MENU_ENTERED) {
+        MAIN_MENU_ENTERED = true;
         displayMenu();
     } else {
         handleSelection();
@@ -27,18 +32,25 @@ void enterPressed() {
 }
 
 void handleSelection() {
-    if (MENU_INDEX == 0) {
-        // create timezone menu
-        Serial.println(menuOptions[MENU_INDEX].c_str());
-    } else if (MENU_INDEX == 1) {
-        // create timer menu or start timer
-        Serial.println(menuOptions[MENU_INDEX].c_str());
-    } else if (MENU_INDEX == 2) {
-        MENU_INDEX = 0;
-        MENU_ENTERED = false;
-        clearPreviousMenuText();
-        createInitialMenu();
-    } 
+    if (TZ_MENU_ENTERED) {
+        Serial.println(tzMenuOptions[TZ_MENU_INDEX]);
+        TZ_MENU_ENTERED = false;
+        displayMenu();
+    } else {
+        if (MAIN_MENU_INDEX == 0) {
+            TZ_MENU_ENTERED = true;
+            displayTimeZoneMenu();
+        } else if (MAIN_MENU_INDEX == 1) {
+            // create timer menu or start timer
+            Serial.println(mainMenuOptions[MAIN_MENU_INDEX].c_str());
+        } else if (MAIN_MENU_INDEX == 2) {
+            MAIN_MENU_INDEX = 0;
+            MAIN_MENU_ENTERED = false;
+            clearPreviousMenuText();
+            createInitialMenu();
+        } 
+    }
+
 }
 
 void displayMenu() {
@@ -47,11 +59,11 @@ void displayMenu() {
     int x = 6;
     int y = 58;
 
-    for (size_t i = 0; i < menuOptions.size(); ++i) {
-        const char* label = menuOptions[i].c_str();
+    for (size_t i = 0; i < mainMenuOptions.size(); ++i) {
+        const char* label = mainMenuOptions[i].c_str();
         u8g2.drawStr(x, y, label);
 
-        if (i == MENU_INDEX) {
+        if (i == MAIN_MENU_INDEX) {
             int strWidth = u8g2.getStrWidth(label);
             u8g2.drawLine(x, y + 2, x + strWidth, y + 2);  // underline
         }
@@ -60,23 +72,77 @@ void displayMenu() {
     }
 }
 
+void displayTimeZoneMenu() {
+    u8g2.setFont(u8g2_font_profont10_tr);
+    clearPreviousMenuText();
+    int x = 6;
+    int y = 58;
+
+    const char* utcLabel = "UTC:";
+    u8g2.drawStr(x, y, utcLabel);
+    x+= u8g2.getStrWidth(utcLabel) + 10;
+
+    const int displayCount = 5;
+    const int half        = displayCount / 2;
+
+    int total = (int)tzMenuOptions.size();
+    int start;
+
+    if (TZ_MENU_INDEX < half) {
+        start = 0;
+    } else if (TZ_MENU_INDEX > total - half - 1) {
+        start = total - displayCount;
+    } else {
+        start = TZ_MENU_INDEX - half;
+    }
+
+    for (int idx = start; idx < start + displayCount; ++idx) {
+        std::string labelStr = std::to_string(tzMenuOptions[idx]);
+        const char*  label   = labelStr.c_str();
+
+        u8g2.drawStr(x, y, label);
+
+        if (idx == TZ_MENU_INDEX) {
+            int strWidth = u8g2.getStrWidth(label);
+            u8g2.drawLine(x, y + 2, x + strWidth, y + 2);  // underline
+        }
+
+        x += u8g2.getStrWidth(label) + 5;
+    }
+}
+
 void forwardMenu() {
-    if (MENU_ENTERED) {
-        if (MENU_INDEX + 1 > menuOptions.size() - 1) {
-            MENU_INDEX = 0;
+    if (TZ_MENU_ENTERED) {
+        if (TZ_MENU_INDEX + 1 > tzMenuOptions.size() - 1) {
+            TZ_MENU_INDEX = 12;
         } else {
-            MENU_INDEX += 1;
+            TZ_MENU_INDEX += 1;
+        }
+        displayTimeZoneMenu();
+    }
+    else if (MAIN_MENU_ENTERED) {
+        if (MAIN_MENU_INDEX + 1 > mainMenuOptions.size() - 1) {
+            MAIN_MENU_INDEX = 0;
+        } else {
+            MAIN_MENU_INDEX += 1;
         }
         displayMenu();
     }
 }
 
 void backwardMenu() {
-    if (MENU_ENTERED) {
-        if (MENU_INDEX - 1 < 0) {
-            MENU_INDEX = menuOptions.size() - 1;
+    if (TZ_MENU_ENTERED) {
+        if (TZ_MENU_INDEX - 1 < -12) {
+            TZ_MENU_INDEX = -12;
         } else {
-            MENU_INDEX -= 1;
+            TZ_MENU_INDEX -= 1;
+        }
+        displayTimeZoneMenu();
+    } else if (MAIN_MENU_ENTERED) {
+        if (MAIN_MENU_INDEX - 1 < 0) {
+            MAIN_MENU_INDEX = mainMenuOptions.size() - 1;
+        } else {
+            MAIN_MENU_INDEX -= 1;
         }
         displayMenu();
     }

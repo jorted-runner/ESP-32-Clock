@@ -7,3 +7,4 @@ void displayMenu();
 void forwardMenu();
 void backwardMenu();
 void clearPreviousMenuText();
+void displayTimeZoneMenu();
