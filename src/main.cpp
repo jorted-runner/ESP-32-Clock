@@ -49,6 +49,7 @@ void setup() {
 
   //Init the TZ_index
   TZ_MENU_INDEX = getTzIndex();
+  DST_MENU_INDEX = getDstIndex();
 
   // set pins to touch mode
   pinMode(enterButtonPin, GPIO_MODE_INPUT);

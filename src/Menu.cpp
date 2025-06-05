@@ -11,12 +11,15 @@
 
 std::vector<std::string> mainMenuOptions = {"Timezone", "Timer", "Exit"};
 std::vector<int> tzMenuOptions = {-12, -11, -10, -9, -8, -7, -6, -5, -4, -3, -2, -1, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12};
+std::vector<std::string> dstMenuOptions = {"F", "T"};
 
 int MAIN_MENU_INDEX = 0;
 int TZ_MENU_INDEX;
+int DST_MENU_INDEX;
 
 bool MAIN_MENU_ENTERED = false;
 bool TZ_MENU_ENTERED = false;
+bool DST_MENU_ENTERED = false;
 
 int getTzIndex() {
     clockPrefs.begin("clockPrefs", false);
@@ -34,8 +37,14 @@ int getTzIndex() {
     }
 }
 
-void createInitialMenu() {
+int getDstIndex() {
+    clockPrefs.begin("clockPrefs", false);
+    int offSet = clockPrefs.getInt("dstOff", 0);
+    clockPrefs.end();
+    return offSet;
+}
 
+void createInitialMenu() {
     u8g2.setFont(u8g2_font_profont15_tr);
     u8g2.drawStr(6, 58, "Menu");
     u8g2.drawLine(4, 60, 35, 60);
@@ -51,19 +60,24 @@ void enterPressed() {
 }
 
 void handleSelection() {
-    if (TZ_MENU_ENTERED) {
-        Serial.println(tzMenuOptions[TZ_MENU_INDEX]);
-        TZ_MENU_ENTERED = false;
+    if (DST_MENU_ENTERED) {
+        DST_MENU_ENTERED = false;
         clockPrefs.begin("clockPrefs", false);
-        clockPrefs.putInt("utcOff", tzMenuOptions[TZ_MENU_INDEX]);
+        clockPrefs.putInt("dstOff", DST_MENU_INDEX);
 
         int utcOffset = clockPrefs.getInt("utcOff", 0) * 3600;
         int dstOffset = clockPrefs.getInt("dstOff", 0) * 3600;
         configTime(utcOffset, dstOffset, NTP_SERVER);
 
         clockPrefs.end();
-
         displayMenu();
+    } else if (TZ_MENU_ENTERED) {
+        TZ_MENU_ENTERED = false;
+        clockPrefs.begin("clockPrefs", false);
+        clockPrefs.putInt("utcOff", tzMenuOptions[TZ_MENU_INDEX]);
+        clockPrefs.end();
+        DST_MENU_ENTERED = true;
+        displayDstMenu();
     } else {
         if (MAIN_MENU_INDEX == 0) {
             TZ_MENU_ENTERED = true;
@@ -111,7 +125,7 @@ void displayTimeZoneMenu() {
     x+= u8g2.getStrWidth(utcLabel) + 10;
 
     const int displayCount = 5;
-    const int half        = displayCount / 2;
+    const int half = displayCount / 2;
 
     int total = (int)tzMenuOptions.size();
     int start;
@@ -140,7 +154,26 @@ void displayTimeZoneMenu() {
 }
 
 void displayDstMenu() {
-    
+    u8g2.setFont(u8g2_font_profont10_tr);
+    clearPreviousMenuText();
+    int x = 6;
+    int y = 58;
+
+    const char* utcLabel = "Daylight Savings:";
+    u8g2.drawStr(x, y, utcLabel);
+    x+= u8g2.getStrWidth(utcLabel) + 10;
+
+    for (size_t i = 0; i < dstMenuOptions.size(); ++i) {
+        const char* label = dstMenuOptions[i].c_str();
+        u8g2.drawStr(x, y, label);
+
+        if (i == DST_MENU_INDEX) {
+            int strWidth = u8g2.getStrWidth(label);
+            u8g2.drawLine(x, y + 2, x + strWidth, y + 2);  // underline
+        }
+
+        x += u8g2.getStrWidth(label) + 10;  // spacing between words
+    }
 }
 
 void forwardMenu() {
@@ -151,8 +184,14 @@ void forwardMenu() {
             TZ_MENU_INDEX += 1;
         }
         displayTimeZoneMenu();
-    }
-    else if (MAIN_MENU_ENTERED) {
+    } else if (DST_MENU_ENTERED) {
+        if (DST_MENU_INDEX == 1) {
+            DST_MENU_INDEX = 0;
+        } else {
+            DST_MENU_INDEX = 1;
+        }
+        displayDstMenu();
+    } else if (MAIN_MENU_ENTERED) {
         if (MAIN_MENU_INDEX + 1 > mainMenuOptions.size() - 1) {
             MAIN_MENU_INDEX = 0;
         } else {
@@ -170,6 +209,13 @@ void backwardMenu() {
             TZ_MENU_INDEX -= 1;
         }
         displayTimeZoneMenu();
+    } else if (DST_MENU_ENTERED) {
+        if (DST_MENU_INDEX == 0) {
+            DST_MENU_INDEX = 1;
+        } else {
+            DST_MENU_INDEX = 0;
+        }
+        displayDstMenu();
     } else if (MAIN_MENU_ENTERED) {
         if (MAIN_MENU_INDEX - 1 < 0) {
             MAIN_MENU_INDEX = mainMenuOptions.size() - 1;
