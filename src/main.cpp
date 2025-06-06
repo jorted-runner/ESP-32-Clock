@@ -1,11 +1,12 @@
 #include <Arduino.h>
+#include <U8g2lib.h>
+#include <Preferences.h>
+
 #include "WiFiManager.h"
 #include "TimeAPICall.h"
 #include "OutputOnDisplay.h"
 #include "Secrets.h"
 #include "Menu.h"
-#include <U8g2lib.h>
-#include <Preferences.h>
 #include "PreferencesGlobals.h"
 
 Preferences clockPrefs;
@@ -98,6 +99,7 @@ void loop() {
   sendTimeToDisplayBuffer(); 
   sendDateToDisplayBuffer();
   sendAnalogTimeToDisplayBuffer();
+  displayTimer();
   
   unsigned long currentTime = millis();
 
