@@ -13,7 +13,7 @@ bool TIMER_RUNNING = false;
 unsigned long timerStartMillis = 0;
 unsigned long pausedElapsedTime = 0;
 
-std::vector<std::string> mainMenuOptions = {"Timezone", "Timer", "Clock Options","Exit"};
+std::vector<std::string> mainMenuOptions = {"Timezone", "Timer", "Settings","Exit"};
 std::vector<int> tzMenuOptions = {-12, -11, -10, -9, -8, -7, -6, -5, -4, -3, -2, -1, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12};
 std::vector<std::string> dstMenuOptions = {"F", "T"};
 
@@ -155,14 +155,15 @@ void handleSelection() {
         displayMenu();
     } else {
         if (MAIN_MENU_INDEX == 0) {
+            // enter timezone menu
             TZ_MENU_ENTERED = true;
             displayTimeZoneMenu();
         } else if (MAIN_MENU_INDEX == 1) {
-            // create timer menu or start timer
+            // initiate timer
             TIMER_ENTERED = true;
             initiateTimer();
         } else if (MAIN_MENU_INDEX == 2) {
-            // clock display option 12 or 24 hour
+            // Enter settings
 
 
             
