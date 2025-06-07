@@ -42,6 +42,8 @@ void setup() {
     clockPrefs.putInt("utcOff", 0);
     clockPrefs.putInt("dstOff", 0);
 
+    clockPrefs.putBool("24hour", true);
+
     clockPrefs.putBool("nvsInit", true);
 
     clockPrefs.end();
@@ -51,6 +53,7 @@ void setup() {
   //Init the TZ_index
   TZ_MENU_INDEX = getTzIndex();
   DST_MENU_INDEX = getDstIndex();
+  TIME_FORMAT_MENU_INDEX = getTimeFormat();
 
   // set pins to touch mode
   pinMode(enterButtonPin, GPIO_MODE_INPUT);
