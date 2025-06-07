@@ -9,7 +9,11 @@
 #include <string>
 #include <algorithm>
 
-std::vector<std::string> mainMenuOptions = {"Timezone", "Timer", "Clock Options","Exit"};
+bool TIMER_RUNNING = false;
+unsigned long timerStartMillis = 0;
+unsigned long pausedElapsedTime = 0;
+
+std::vector<std::string> mainMenuOptions = {"Timezone", "Timer", "Settings","Exit"};
 std::vector<int> tzMenuOptions = {-12, -11, -10, -9, -8, -7, -6, -5, -4, -3, -2, -1, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12};
 std::vector<std::string> dstMenuOptions = {"F", "T"};
 
@@ -20,6 +24,7 @@ int DST_MENU_INDEX;
 bool MAIN_MENU_ENTERED = false;
 bool TZ_MENU_ENTERED = false;
 bool DST_MENU_ENTERED = false;
+bool TIMER_ENTERED = false;
 
 int getTzIndex() {
     clockPrefs.begin("clockPrefs", false);
@@ -59,6 +64,71 @@ void enterPressed() {
     }
 }
 
+void forwardMenu() {
+    if (TZ_MENU_ENTERED) {
+        if (TZ_MENU_INDEX + 1 > tzMenuOptions.size() - 1) {
+            TZ_MENU_INDEX = tzMenuOptions.size() - 1;
+        } else {
+            TZ_MENU_INDEX += 1;
+        }
+        displayTimeZoneMenu();
+    } else if (DST_MENU_ENTERED) {
+        if (DST_MENU_INDEX == 1) {
+            DST_MENU_INDEX = 0;
+        } else {
+            DST_MENU_INDEX = 1;
+        }
+        displayDstMenu();
+    } else if (TIMER_ENTERED) {
+        // Pause Timer
+        if (TIMER_RUNNING) {
+            TIMER_RUNNING = false;
+            pausedElapsedTime += millis() - timerStartMillis;
+        } else {
+        // Resume Timer
+            timerStartMillis = millis();
+            TIMER_RUNNING = true;
+        }
+    } else if (MAIN_MENU_ENTERED) {
+        if (MAIN_MENU_INDEX + 1 > mainMenuOptions.size() - 1) {
+            MAIN_MENU_INDEX = 0;
+        } else {
+            MAIN_MENU_INDEX += 1;
+        }
+        displayMenu();
+    }
+}
+
+void backwardMenu() {
+    if (TZ_MENU_ENTERED) {
+        if (TZ_MENU_INDEX - 1 < 0) {
+            TZ_MENU_INDEX = 0;
+        } else {
+            TZ_MENU_INDEX -= 1;
+        }
+        displayTimeZoneMenu();
+    } else if (DST_MENU_ENTERED) {
+        if (DST_MENU_INDEX == 0) {
+            DST_MENU_INDEX = 1;
+        } else {
+            DST_MENU_INDEX = 0;
+        }
+        displayDstMenu();
+    } else if (TIMER_ENTERED) {
+        // Restart Timer
+        pausedElapsedTime = 0;
+        timerStartMillis = millis();
+        TIMER_RUNNING = true;
+    } else if (MAIN_MENU_ENTERED) {
+        if (MAIN_MENU_INDEX - 1 < 0) {
+            MAIN_MENU_INDEX = mainMenuOptions.size() - 1;
+        } else {
+            MAIN_MENU_INDEX -= 1;
+        }
+        displayMenu();
+    }
+}
+
 void handleSelection() {
     if (DST_MENU_ENTERED) {
         DST_MENU_ENTERED = false;
@@ -78,15 +148,22 @@ void handleSelection() {
         clockPrefs.end();
         DST_MENU_ENTERED = true;
         displayDstMenu();
+    } else if (TIMER_ENTERED) {
+        TIMER_ENTERED = false;
+        TIMER_RUNNING = false;
+        timerStartMillis = 0;
+        displayMenu();
     } else {
         if (MAIN_MENU_INDEX == 0) {
+            // enter timezone menu
             TZ_MENU_ENTERED = true;
             displayTimeZoneMenu();
         } else if (MAIN_MENU_INDEX == 1) {
-            // create timer menu or start timer
-            Serial.println(mainMenuOptions[MAIN_MENU_INDEX].c_str());
+            // initiate timer
+            TIMER_ENTERED = true;
+            initiateTimer();
         } else if (MAIN_MENU_INDEX == 2) {
-            // clock display option 12 or 24 hour
+            // Enter settings
 
 
             
@@ -97,25 +174,38 @@ void handleSelection() {
             createInitialMenu();
         }
     }
-
 }
 
 void displayMenu() {
     u8g2.setFont(u8g2_font_profont10_tr);
     clearPreviousMenuText();
+
     int x = 6;
     int y = 58;
 
-    for (size_t i = 0; i < mainMenuOptions.size(); ++i) {
-        const char* label = mainMenuOptions[i].c_str();
+    const int displayCount = 2;  // show 2 items at a time
+    int total = (int)mainMenuOptions.size();
+    int start;
+
+    if (MAIN_MENU_INDEX == 0) {
+        start = 0;
+    } else if (MAIN_MENU_INDEX >= total - 1) {
+        start = total - 2;
+        if (start < 0) start = 0;
+    } else {
+        start = MAIN_MENU_INDEX - 1;
+    }
+
+    for (int idx = start; idx < start + displayCount && idx < total; ++idx) {
+        const char* label = mainMenuOptions[idx].c_str();
         u8g2.drawStr(x, y, label);
 
-        if (i == MAIN_MENU_INDEX) {
+        if (idx == MAIN_MENU_INDEX) {
             int strWidth = u8g2.getStrWidth(label);
-            u8g2.drawLine(x, y + 2, x + strWidth, y + 2);  // underline
+            u8g2.drawLine(x, y + 2, x + strWidth, y + 2);  // underline selected
         }
 
-        x += u8g2.getStrWidth(label) + 10;  // spacing between words
+        x += u8g2.getStrWidth(label) + 10;
     }
 }
 
@@ -181,53 +271,29 @@ void displayDstMenu() {
     }
 }
 
-void forwardMenu() {
-    if (TZ_MENU_ENTERED) {
-        if (TZ_MENU_INDEX + 1 > tzMenuOptions.size() - 1) {
-            TZ_MENU_INDEX = tzMenuOptions.size() - 1;
-        } else {
-            TZ_MENU_INDEX += 1;
-        }
-        displayTimeZoneMenu();
-    } else if (DST_MENU_ENTERED) {
-        if (DST_MENU_INDEX == 1) {
-            DST_MENU_INDEX = 0;
-        } else {
-            DST_MENU_INDEX = 1;
-        }
-        displayDstMenu();
-    } else if (MAIN_MENU_ENTERED) {
-        if (MAIN_MENU_INDEX + 1 > mainMenuOptions.size() - 1) {
-            MAIN_MENU_INDEX = 0;
-        } else {
-            MAIN_MENU_INDEX += 1;
-        }
-        displayMenu();
-    }
+void initiateTimer() {
+    timerStartMillis = millis();
+    TIMER_RUNNING = true;
 }
 
-void backwardMenu() {
-    if (TZ_MENU_ENTERED) {
-        if (TZ_MENU_INDEX - 1 < 0) {
-            TZ_MENU_INDEX = 0;
-        } else {
-            TZ_MENU_INDEX -= 1;
+void displayTimer() {
+    if (TIMER_ENTERED && TIMER_RUNNING) {
+        unsigned long elapsed = pausedElapsedTime;
+        if (TIMER_RUNNING) {
+            elapsed += millis() - timerStartMillis;
         }
-        displayTimeZoneMenu();
-    } else if (DST_MENU_ENTERED) {
-        if (DST_MENU_INDEX == 0) {
-            DST_MENU_INDEX = 1;
-        } else {
-            DST_MENU_INDEX = 0;
-        }
-        displayDstMenu();
-    } else if (MAIN_MENU_ENTERED) {
-        if (MAIN_MENU_INDEX - 1 < 0) {
-            MAIN_MENU_INDEX = mainMenuOptions.size() - 1;
-        } else {
-            MAIN_MENU_INDEX -= 1;
-        }
-        displayMenu();
+
+        int hours = elapsed / 3600000;
+        int minutes = (elapsed / 60000) % 60;
+        int seconds = (elapsed / 1000) % 60;
+
+        char buffer[9];
+        sprintf(buffer, "%02d:%02d:%02d", hours, minutes, seconds);
+
+        clearPreviousMenuText();
+        u8g2.setFont(u8g2_font_profont10_tr);
+        u8g2.drawStr(6, 58, buffer);
+        u8g2.sendBuffer();
     }
 }
 

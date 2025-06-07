@@ -14,3 +14,5 @@ void displayTimeZoneMenu();
 void displayDstMenu();
 int getTzIndex();
 int getDstIndex();
+void initiateTimer();
+void displayTimer();
