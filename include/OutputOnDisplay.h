@@ -20,13 +20,13 @@
 
 extern U8G2_SH1106_128X64_NONAME_F_HW_I2C u8g2;
 
-
 //here are all the functions declarations
 void prepareDisplay();
 void sendTimeToDisplayBuffer();
 void sendDateToDisplayBuffer();
 void sendAnalogTimeToDisplayBuffer();
 void outputOnDisplay();
+void prepareClockDisplayArea();
 
 //helper functions
 void drawClockHands(float, int, int, int);

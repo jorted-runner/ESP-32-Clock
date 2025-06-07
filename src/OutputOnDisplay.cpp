@@ -6,7 +6,6 @@
 //In case you know which driver you are using (sh1106 or ssd1306) you just need to uncomment that one and comment
 //out the other one.
 
-U8G2_SH1106_128X64_NONAME_F_HW_I2C u8g2(U8G2_R0, SCL_PIN, SDA_PIN, RESET_PIN);
 //U8G2_SSD1306_128X32_UNIVISION_F_SW_I2C u8g2(U8G2_R0, SCL_PIN, SDA_PIN, U8X8_PIN_NONE);
 
 //this function sets all the required flags for the display, and clears whatever was on there before
@@ -96,7 +95,15 @@ void sendAnalogTimeToDisplayBuffer(){
     
 }
 
+void prepareClockDisplayArea() {
+    u8g2.setFontMode(1);
+    u8g2.setBitmapMode(1);
 
+    // Clear only the top portion (top 48 pixels)
+    u8g2.setDrawColor(0);                // Erase mode
+    u8g2.drawBox(0, 0, 128, 48);         // x, y, width, height
+    u8g2.setDrawColor(1);                // Restore draw mode
+}
 
 //this function sends all stored things in the buffer to the display
 void outputOnDisplay(){
