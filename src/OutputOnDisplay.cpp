@@ -1,5 +1,6 @@
 #include <Arduino.h>
 #include "OutputOnDisplay.h"
+#include "PreferencesGlobals.h"
 
 //Depending on your screen, you need to uncomment either one of them. Just try out, which one works, 
 //in case you arent sure which one you need
@@ -21,17 +22,45 @@ void sendTimeToDisplayBuffer(){
     if (!getLocalTime(&timeinfo)) {
         return;
     }
+    clockPrefs.begin("clockPrefs", false);
+    
+
+    int hoursInCorrectFormat;
+
+    if (clockPrefs.getBool("24hour", true)){
+        hoursInCorrectFormat = timeinfo.tm_hour;
+    } else {
+        hoursInCorrectFormat = timeinfo.tm_hour % 12;
+        if (hoursInCorrectFormat == 0) {
+            hoursInCorrectFormat = 12;
+        }
+    }
+
+    clockPrefs.end();
 
     //this part is used to take the timeinfo, and convert the hours and minutes to an array of chars
     //this is done, since the u8g2.drawStr method is expecting it to be of that type.
     char timeStr[6]; //HH:MM + null terminator
-    snprintf(timeStr, sizeof(timeStr), "%02d:%02d", timeinfo.tm_hour, timeinfo.tm_min);
+    snprintf(timeStr, sizeof(timeStr), "%02d:%02d", hoursInCorrectFormat, timeinfo.tm_min);
     
     //here we set the font
     u8g2.setFont(u8g2_font_profont22_tr);
 
     //this is where we actually write the time to the buffer
     u8g2.drawStr(59, 20, timeStr);
+
+    clockPrefs.begin("clockPrefs", false);
+    if (clockPrefs.getBool("24hour", true)){
+
+    } else {
+        if (timeinfo.tm_hour <=12){
+        u8g2.drawFrame(59, 0, 58, 5);
+        } else {
+            u8g2.drawBox(59, 0, 58, 5);
+        }
+    }
+    clockPrefs.end();
+
 }
 
 //will get date from rtc and send it to the buffer, ready to be printed out on the display, once outputOnDisplay function is called

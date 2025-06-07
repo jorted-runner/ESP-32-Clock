@@ -8,23 +8,27 @@
 #include <vector>
 #include <string>
 #include <algorithm>
+//#include <U8g2lib.h>
 
 bool TIMER_RUNNING = false;
 unsigned long timerStartMillis = 0;
 unsigned long pausedElapsedTime = 0;
 
-std::vector<std::string> mainMenuOptions = {"Timezone", "Timer", "Settings","Exit"};
+std::vector<std::string> mainMenuOptions = {"Timezone", "Timer", "Settings", "TimeFormat", "Exit"};
 std::vector<int> tzMenuOptions = {-12, -11, -10, -9, -8, -7, -6, -5, -4, -3, -2, -1, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12};
 std::vector<std::string> dstMenuOptions = {"F", "T"};
+std::vector<std::string> timeFormatMenuOptions = {"12 hour", "24 hour"};
 
 int MAIN_MENU_INDEX = 0;
 int TZ_MENU_INDEX;
 int DST_MENU_INDEX;
+int TIME_FORMAT_MENU_INDEX;
 
 bool MAIN_MENU_ENTERED = false;
 bool TZ_MENU_ENTERED = false;
 bool DST_MENU_ENTERED = false;
 bool TIMER_ENTERED = false;
+bool TIME_FORMAT_ENTERED = false;
 
 int getTzIndex() {
     clockPrefs.begin("clockPrefs", false);
@@ -47,6 +51,13 @@ int getDstIndex() {
     int offSet = clockPrefs.getInt("dstOff", 0);
     clockPrefs.end();
     return offSet;
+}
+
+bool getTimeFormat() {
+    clockPrefs.begin("clockPrefs", false);
+    bool timeFormat = clockPrefs.getBool("24hour", true);
+    clockPrefs.end();
+    return timeFormat;
 }
 
 void createInitialMenu() {
@@ -89,6 +100,13 @@ void forwardMenu() {
             timerStartMillis = millis();
             TIMER_RUNNING = true;
         }
+    } else if (TIME_FORMAT_ENTERED) {
+        if (TIME_FORMAT_MENU_INDEX == 1) {
+            TIME_FORMAT_MENU_INDEX = 0;
+        } else {
+            TIME_FORMAT_MENU_INDEX = 1;
+        }
+        displayTimeFormatMenu();
     } else if (MAIN_MENU_ENTERED) {
         if (MAIN_MENU_INDEX + 1 > mainMenuOptions.size() - 1) {
             MAIN_MENU_INDEX = 0;
@@ -119,6 +137,13 @@ void backwardMenu() {
         pausedElapsedTime = 0;
         timerStartMillis = millis();
         TIMER_RUNNING = true;
+    } else if (TIME_FORMAT_ENTERED) {
+        if (TIME_FORMAT_MENU_INDEX == 0) {
+            TIME_FORMAT_MENU_INDEX = 1;
+        } else {
+            TIME_FORMAT_MENU_INDEX = 0;
+        }
+        displayTimeFormatMenu();
     } else if (MAIN_MENU_ENTERED) {
         if (MAIN_MENU_INDEX - 1 < 0) {
             MAIN_MENU_INDEX = mainMenuOptions.size() - 1;
@@ -153,6 +178,13 @@ void handleSelection() {
         TIMER_RUNNING = false;
         timerStartMillis = 0;
         displayMenu();
+    } else if (TIME_FORMAT_ENTERED) {
+        TIME_FORMAT_ENTERED = false;
+        clockPrefs.begin("clockPrefs", false);
+        clockPrefs.putBool("24hour", TIME_FORMAT_MENU_INDEX);
+        //Serial.println(clockPrefs.getBool("24hour", false));
+        clockPrefs.end();
+        displayMenu();
     } else {
         if (MAIN_MENU_INDEX == 0) {
             // enter timezone menu
@@ -168,6 +200,10 @@ void handleSelection() {
 
             
         } else if (MAIN_MENU_INDEX == 3) {
+            //enter time format menu
+            TIME_FORMAT_ENTERED = true;
+            displayTimeFormatMenu();
+        } else if (MAIN_MENU_INDEX == 4) {
             MAIN_MENU_INDEX = 0;
             MAIN_MENU_ENTERED = false;
             clearPreviousMenuText();
@@ -258,14 +294,30 @@ void displayDstMenu() {
     u8g2.drawStr(x, y, utcLabel);
     x+= u8g2.getStrWidth(utcLabel) + 10;
 
+    int crossWidth = 10;
+    int checkWidth = 12;
+
+    y = 46;
+
     for (size_t i = 0; i < dstMenuOptions.size(); ++i) {
         const char* label = dstMenuOptions[i].c_str();
-        u8g2.drawStr(x, y, label);
-
-        if (i == DST_MENU_INDEX) {
-            int strWidth = u8g2.getStrWidth(label);
-            u8g2.drawLine(x, y + 2, x + strWidth, y + 2);  // underline
+        //u8g2.drawStr(x, y, label);
+        if (i == 0){
+            u8g2.drawXBM(x, y, crossWidth, 16, image_cross_small_bits);
+            if (i == DST_MENU_INDEX) {
+                int strWidth = u8g2.getStrWidth(label);
+                u8g2.drawLine(x, y + 14, x + crossWidth, y + 14);  // underline
+            }
+        } else {
+            u8g2.drawXBM(x, y, checkWidth, 16, image_check_bits);
+            if (i == DST_MENU_INDEX) { 
+                int strWidth = u8g2.getStrWidth(label);
+                u8g2.drawLine(x, y + 14, x + checkWidth, y + 14);  // underline
+            }
         }
+        
+
+        
 
         x += u8g2.getStrWidth(label) + 10;  // spacing between words
     }
@@ -294,6 +346,29 @@ void displayTimer() {
         u8g2.setFont(u8g2_font_profont10_tr);
         u8g2.drawStr(6, 58, buffer);
         u8g2.sendBuffer();
+    }
+}
+
+void displayTimeFormatMenu() {
+    u8g2.setFont(u8g2_font_profont10_tr);
+    clearPreviousMenuText();
+    int x = 6;
+    int y = 58;
+
+    const char* utcLabel = "Format:";
+    u8g2.drawStr(x, y, utcLabel);
+    x+= u8g2.getStrWidth(utcLabel) + 10;
+
+    for (size_t i = 0; i < timeFormatMenuOptions.size(); ++i) {
+        const char* label = timeFormatMenuOptions[i].c_str();
+        u8g2.drawStr(x, y, label);
+
+        if (i == TIME_FORMAT_MENU_INDEX) {
+            int strWidth = u8g2.getStrWidth(label);
+            u8g2.drawLine(x, y + 2, x + strWidth, y + 2);  // underline
+        }
+
+        x += u8g2.getStrWidth(label) + 10;  // spacing between words
     }
 }
 
