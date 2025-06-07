@@ -41,7 +41,13 @@ void sendTimeToDisplayBuffer(){
     //this part is used to take the timeinfo, and convert the hours and minutes to an array of chars
     //this is done, since the u8g2.drawStr method is expecting it to be of that type.
     char timeStr[6]; //HH:MM + null terminator
-    snprintf(timeStr, sizeof(timeStr), "%02d:%02d", hoursInCorrectFormat, timeinfo.tm_min);
+
+    if (timeinfo.tm_sec % 2 == 1){
+        snprintf(timeStr, sizeof(timeStr), "%02d:%02d", hoursInCorrectFormat, timeinfo.tm_min);
+    } else {
+        snprintf(timeStr, sizeof(timeStr), "%02d %02d", hoursInCorrectFormat, timeinfo.tm_min);
+    }
+    
     
     //here we set the font
     u8g2.setFont(u8g2_font_profont22_tr);
