@@ -8,6 +8,7 @@
 #include "Secrets.h"
 #include "Menu.h"
 #include "PreferencesGlobals.h"
+#include "PrefUtils.h"
 
 Preferences clockPrefs;
 
@@ -31,23 +32,17 @@ void setup() {
   //this establishes a serial connection with the PC. This makes debugging a lot easier
   Serial.begin(115200);
 
-  clockPrefs.begin("clockPrefs", RO_MODE);
-
-  bool tpInit = clockPrefs.isKey("nvsInit");
+  bool tpInit = checkKeyExists("nvsInit");
 
   if (tpInit == false) {
-    clockPrefs.end();
-    clockPrefs.begin("clockPrefs", RW_MODE);
 
-    clockPrefs.putInt("utcOff", 0);
-    clockPrefs.putInt("dstOff", 0);
+    setIntPref("utcOff", 0);
+    setIntPref("dstOff", 0);
 
-    clockPrefs.putBool("24hour", true);
+    setBoolPref("24hour", true);
 
-    clockPrefs.putBool("nvsInit", true);
+    setBoolPref("nvsInit", true);
 
-    clockPrefs.end();
-    clockPrefs.begin("clockPrefs", RO_MODE);
   }
 
   //Init the TZ_index
@@ -76,9 +71,8 @@ void setup() {
 
   //utcOffset is set to 0 at the start, it is there to set your timezone
   //dstOffset is also set to 0, it defines whether or not there is daylight savings time observed
-  int utcOffset = clockPrefs.getInt("utcOff", 0) * 3600;
-  int dstOffset = clockPrefs.getInt("dstOff", 0) * 3600;
-  clockPrefs.end();
+  int utcOffset = getUtcOffsetInSeconds();
+  int dstOffset = getDstOffsetInSeconds();
 
   //this gets the time from the API
   configTime(utcOffset, dstOffset, NTP_SERVER);
@@ -140,10 +134,8 @@ void wifiAndTimeTask(void * parameter) { // FreeRTOS allows passing parameter to
 
     // if the wifi is connected, call the api to update the time
     if (connected) {
-      clockPrefs.begin("clockPrefs", RO_MODE);
-      int utcOffset = clockPrefs.getInt("utcOff", 0) * 3600;
-      int dstOffset = clockPrefs.getInt("dstOff", 0) * 3600;
-      clockPrefs.end();
+      int utcOffset = getUtcOffsetInSeconds();
+      int dstOffset = getDstOffsetInSeconds();
       configTime(utcOffset, dstOffset, NTP_SERVER);
       Serial.println("\nTime synced");
     }

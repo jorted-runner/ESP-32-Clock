@@ -3,6 +3,7 @@
 #include "OutputOnDisplay.h"
 #include "PreferencesGlobals.h"
 #include "TimeAPICall.h"
+#include "PrefUtils.h"
 
 #include <iostream>
 #include <vector>
@@ -35,9 +36,7 @@ int initialY = 58;
 
 // Function to return the index of the users stored TimeZone.
 int getTzIndex() {
-    clockPrefs.begin("clockPrefs", RO_MODE);
-    int offSet = clockPrefs.getInt("utcOff", 0);
-    clockPrefs.end();
+    int offSet = getUtcOffset();
 
     // Search the vector for the offset retrieved from the Preferences
     auto it = std::find(tzMenuOptions.begin(), tzMenuOptions.end(), offSet);
@@ -52,18 +51,8 @@ int getTzIndex() {
 
 // Return the Index of users Daylight Savings Time preferences
 int getDstIndex() {
-    clockPrefs.begin("clockPrefs", RO_MODE);
-    int offSet = clockPrefs.getInt("dstOff", 0); // Default to 0
-    clockPrefs.end();
+    int offSet = getDstOffset(); // Default to 0
     return offSet;
-}
-
-// Return the Index of users Clock format preferences
-bool getTimeFormat() {
-    clockPrefs.begin("clockPrefs", RO_MODE);
-    bool timeFormat = clockPrefs.getBool("24hour", true); // Default to 24 hour
-    clockPrefs.end();
-    return timeFormat;
 }
 
 // Function to add Menu to display
@@ -86,23 +75,17 @@ void enterPressed() {
 void handleSelection() {
     if (DST_MENU_ENTERED) {  // If in DST menu Clock needs to be updated to reflect users new Timezone and Daylight Savings preferences
         DST_MENU_ENTERED = false;
+        setIntPref("dstOff", DST_MENU_INDEX);
 
-        clockPrefs.begin("clockPrefs", RW_MODE);
-        clockPrefs.putInt("dstOff", DST_MENU_INDEX);
-
-        int utcOffset = clockPrefs.getInt("utcOff", 0) * 3600;
-        int dstOffset = clockPrefs.getInt("dstOff", 0) * 3600;
-
-        clockPrefs.end();
+        int utcOffset = getUtcOffsetInSeconds();
+        int dstOffset = getDstOffsetInSeconds();
 
         configTime(utcOffset, dstOffset, NTP_SERVER);
 
         displayMainMenu();
     } else if (TZ_MENU_ENTERED) { // If in Timezone menu, set users timezone preference to the selected preference
         TZ_MENU_ENTERED = false;
-        clockPrefs.begin("clockPrefs", RW_MODE);
-        clockPrefs.putInt("utcOff", tzMenuOptions[TZ_MENU_INDEX]);
-        clockPrefs.end();
+        setIntPref("utcOff", tzMenuOptions[TZ_MENU_INDEX]);
         DST_MENU_ENTERED = true;
         displayDstMenu();
     } else if (TIMER_ENTERED) { // If in timer, return to main menu and reset timer settings
@@ -112,10 +95,7 @@ void handleSelection() {
         displayMainMenu();
     } else if (TIME_FORMAT_ENTERED) { // If in time format menu, store user selected time format preference
         TIME_FORMAT_ENTERED = false;
-        clockPrefs.begin("clockPrefs", RW_MODE);
-        clockPrefs.putBool("24hour", TIME_FORMAT_MENU_INDEX);
-        //Serial.println(clockPrefs.getBool("24hour", false));
-        clockPrefs.end();
+        setBoolPref("24hour", TIME_FORMAT_MENU_INDEX);
         displayMainMenu();
     } else {
         if (MAIN_MENU_INDEX == 0) {
