@@ -22,3 +22,4 @@ void initiateTimer();
 void displayTimer();
 void displayTimeFormatMenu();
 bool getTimeFormat();
+void prepMenu();

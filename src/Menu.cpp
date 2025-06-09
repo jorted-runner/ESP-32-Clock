@@ -216,9 +216,7 @@ void backwardMenu() {
 }
 
 void displayMainMenu() {
-    // Set font and clear previous text
-    u8g2.setFont(u8g2_font_profont10_tr);
-    clearPreviousMenuText();
+    prepMenu();
 
     // set initial x, y
     int x = initialX;
@@ -253,21 +251,25 @@ void displayMainMenu() {
 }
 
 void displayTimeZoneMenu() {
-    u8g2.setFont(u8g2_font_profont10_tr);
-    clearPreviousMenuText();
+    prepMenu();
+
+    // set initial x, y
     int x = initialX;
     int y = initialY;
 
+    // create and draw UTC label
     const char* utcLabel = "UTC:";
     u8g2.drawStr(x, y, utcLabel);
     x+= u8g2.getStrWidth(utcLabel) + 10;
-
+   
+    // Set menu items to display and find middle
     const int displayCount = 5;
     const int half = displayCount / 2;
 
     int total = (int)tzMenuOptions.size();
     int start;
 
+    // set index for first time to display
     if (TZ_MENU_INDEX < half) {
         start = 0;
     } else if (TZ_MENU_INDEX > total - half - 1) {
@@ -276,6 +278,7 @@ void displayTimeZoneMenu() {
         start = TZ_MENU_INDEX - half;
     }
 
+    // display required number of menu items and underline current menu index
     for (int idx = start; idx < start + displayCount; ++idx) {
         std::string labelStr = std::to_string(tzMenuOptions[idx]);
         const char*  label   = labelStr.c_str();
@@ -284,18 +287,18 @@ void displayTimeZoneMenu() {
 
         if (idx == TZ_MENU_INDEX) {
             int strWidth = u8g2.getStrWidth(label);
-            u8g2.drawLine(x, y + 2, x + strWidth, y + 2);  // underline
+            u8g2.drawLine(x, y + 2, x + strWidth, y + 2);  // underline selection
         }
 
-        x += u8g2.getStrWidth(label) + 5;
+        x += u8g2.getStrWidth(label) + 5; // calculate starting x based of labels width plus spaceing
     }
 }
 
 void displayDstMenu() {
-    u8g2.setFont(u8g2_font_profont10_tr);
-    clearPreviousMenuText();
-    int x = 6;
-    int y = 58;
+    prepMenu();
+
+    int x = initialX;
+    int y = initialY;
 
     const char* utcLabel = "Daylight Savings:";
     u8g2.drawStr(x, y, utcLabel);
@@ -357,8 +360,7 @@ void displayTimer() {
 }
 
 void displayTimeFormatMenu() {
-    u8g2.setFont(u8g2_font_profont10_tr);
-    clearPreviousMenuText();
+    prepMenu();
     int x = 6;
     int y = 58;
 
@@ -384,5 +386,9 @@ void clearPreviousMenuText() {
     // x, y, w, h
     u8g2.drawBox(0, 48, 128, 16); // Clear previous text
     u8g2.setDrawColor(1);
-
 }
+
+void prepMenu() {
+    u8g2.setFont(u8g2_font_profont10_tr);
+    clearPreviousMenuText();
+} 
