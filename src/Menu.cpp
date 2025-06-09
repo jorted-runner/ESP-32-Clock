@@ -325,9 +325,6 @@ void displayDstMenu() {
                 u8g2.drawLine(x, y + 14, x + checkWidth, y + 14);  // underline
             }
         }
-        
-
-        
 
         x += u8g2.getStrWidth(label) + 10;  // spacing between words
     }
@@ -352,17 +349,16 @@ void displayTimer() {
         char buffer[9];
         sprintf(buffer, "%02d:%02d:%02d", hours, minutes, seconds);
 
-        clearPreviousMenuText();
-        u8g2.setFont(u8g2_font_profont10_tr);
-        u8g2.drawStr(6, 58, buffer);
+        prepMenu();
+        u8g2.drawStr(initialX, initialY, buffer);
         u8g2.sendBuffer();
     }
 }
 
 void displayTimeFormatMenu() {
     prepMenu();
-    int x = 6;
-    int y = 58;
+    int x = initialX;
+    int y = initialY;
 
     const char* utcLabel = "Format:";
     u8g2.drawStr(x, y, utcLabel);
