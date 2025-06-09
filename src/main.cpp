@@ -74,12 +74,13 @@ void setup() {
   // Connect to WiFi using the WiFiManager module  
   connectToWiFi(ssid, password);
 
-  //this gets the time from the API
   //utcOffset is set to 0 at the start, it is there to set your timezone
   //dstOffset is also set to 0, it defines whether or not there is daylight savings time observed
   int utcOffset = clockPrefs.getInt("utcOff", 0) * 3600;
   int dstOffset = clockPrefs.getInt("dstOff", 0) * 3600;
   clockPrefs.end();
+
+  //this gets the time from the API
   configTime(utcOffset, dstOffset, NTP_SERVER);
 
   createInitialMenu();
@@ -139,7 +140,7 @@ void wifiAndTimeTask(void * parameter) { // FreeRTOS allows passing parameter to
 
     // if the wifi is connected, call the api to update the time
     if (connected) {
-      clockPrefs.begin("clockPrefs", false);
+      clockPrefs.begin("clockPrefs", RO_MODE);
       int utcOffset = clockPrefs.getInt("utcOff", 0) * 3600;
       int dstOffset = clockPrefs.getInt("dstOff", 0) * 3600;
       clockPrefs.end();

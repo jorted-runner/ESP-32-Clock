@@ -35,7 +35,7 @@ int initialY = 58;
 
 // Function to return the index of the users stored TimeZone.
 int getTzIndex() {
-    clockPrefs.begin("clockPrefs", false);
+    clockPrefs.begin("clockPrefs", RO_MODE);
     int offSet = clockPrefs.getInt("utcOff", 0);
     clockPrefs.end();
 
@@ -52,7 +52,7 @@ int getTzIndex() {
 
 // Return the Index of users Daylight Savings Time preferences
 int getDstIndex() {
-    clockPrefs.begin("clockPrefs", false);
+    clockPrefs.begin("clockPrefs", RO_MODE);
     int offSet = clockPrefs.getInt("dstOff", 0); // Default to 0
     clockPrefs.end();
     return offSet;
@@ -60,7 +60,7 @@ int getDstIndex() {
 
 // Return the Index of users Clock format preferences
 bool getTimeFormat() {
-    clockPrefs.begin("clockPrefs", false);
+    clockPrefs.begin("clockPrefs", RO_MODE);
     bool timeFormat = clockPrefs.getBool("24hour", true); // Default to 24 hour
     clockPrefs.end();
     return timeFormat;
@@ -86,18 +86,21 @@ void enterPressed() {
 void handleSelection() {
     if (DST_MENU_ENTERED) {  // If in DST menu Clock needs to be updated to reflect users new Timezone and Daylight Savings preferences
         DST_MENU_ENTERED = false;
-        clockPrefs.begin("clockPrefs", false);
+
+        clockPrefs.begin("clockPrefs", RW_MODE);
         clockPrefs.putInt("dstOff", DST_MENU_INDEX);
 
         int utcOffset = clockPrefs.getInt("utcOff", 0) * 3600;
         int dstOffset = clockPrefs.getInt("dstOff", 0) * 3600;
-        configTime(utcOffset, dstOffset, NTP_SERVER);
 
         clockPrefs.end();
+
+        configTime(utcOffset, dstOffset, NTP_SERVER);
+
         displayMainMenu();
     } else if (TZ_MENU_ENTERED) { // If in Timezone menu, set users timezone preference to the selected preference
         TZ_MENU_ENTERED = false;
-        clockPrefs.begin("clockPrefs", false);
+        clockPrefs.begin("clockPrefs", RW_MODE);
         clockPrefs.putInt("utcOff", tzMenuOptions[TZ_MENU_INDEX]);
         clockPrefs.end();
         DST_MENU_ENTERED = true;
@@ -109,7 +112,7 @@ void handleSelection() {
         displayMainMenu();
     } else if (TIME_FORMAT_ENTERED) { // If in time format menu, store user selected time format preference
         TIME_FORMAT_ENTERED = false;
-        clockPrefs.begin("clockPrefs", false);
+        clockPrefs.begin("clockPrefs", RW_MODE);
         clockPrefs.putBool("24hour", TIME_FORMAT_MENU_INDEX);
         //Serial.println(clockPrefs.getBool("24hour", false));
         clockPrefs.end();
