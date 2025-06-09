@@ -32,18 +32,18 @@ bool getTimeFormat() {
     return timeFormat;
 }
 
-bool checkKeyExists(char* key) {
+bool checkKeyExists(const char* key) {
     clockPrefs.begin("clockPrefs", RO_MODE);
     return clockPrefs.isKey(key);
 }
 
-void setIntPref(char* key, int value) {
+void setIntPref(const char* key, int value) {
     clockPrefs.begin("clockPrefs", RW_MODE);
     clockPrefs.putInt(key, value);
     clockPrefs.end();
 }
 
-void setBoolPref(char* key, bool value) {
+void setBoolPref(const char* key, bool value) {
     clockPrefs.begin("clockPrefs", RW_MODE);
     clockPrefs.putBool(key, value);
     clockPrefs.end();

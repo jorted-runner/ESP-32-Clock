@@ -1,14 +1,15 @@
-#include <Arduino.h>
 #include "Menu.h"
 #include "OutputOnDisplay.h"
 #include "PreferencesGlobals.h"
 #include "TimeAPICall.h"
 #include "PrefUtils.h"
+#include "TimerUtils.h"
 
 #include <iostream>
 #include <vector>
 #include <string>
 #include <algorithm>
+#include <Arduino.h>
 
 // Establish Menu variables
 bool TIMER_RUNNING = false;
@@ -90,8 +91,7 @@ void handleSelection() {
         displayDstMenu();
     } else if (TIMER_ENTERED) { // If in timer, return to main menu and reset timer settings
         TIMER_ENTERED = false;
-        TIMER_RUNNING = false;
-        timerStartMillis = 0;
+        resetTimer();
         displayMainMenu();
     } else if (TIME_FORMAT_ENTERED) { // If in time format menu, store user selected time format preference
         TIME_FORMAT_ENTERED = false;
@@ -137,13 +137,7 @@ void forwardMenu() {
         }
         displayDstMenu();
     } else if (TIMER_ENTERED) {
-        if (TIMER_RUNNING) { // Pause Timer
-            TIMER_RUNNING = false;
-            pausedElapsedTime += millis() - timerStartMillis;
-        } else { // Resume Timer        
-            timerStartMillis = millis();
-            TIMER_RUNNING = true;
-        }
+        toggleTimer(); // Pause/start timer
     } else if (TIME_FORMAT_ENTERED) { // Move forward in the time format menu
         if (TIME_FORMAT_MENU_INDEX == 1) {
             TIME_FORMAT_MENU_INDEX = 0;
@@ -178,9 +172,7 @@ void backwardMenu() {
         }
         displayDstMenu();
     } else if (TIMER_ENTERED) { // Restart Timer
-        pausedElapsedTime = 0;
-        timerStartMillis = millis();
-        TIMER_RUNNING = true;
+        restartTimer();
     } else if (TIME_FORMAT_ENTERED) { // Move backward in Time format menu
         if (TIME_FORMAT_MENU_INDEX == 0) {
             TIME_FORMAT_MENU_INDEX = 1;
@@ -313,25 +305,12 @@ void displayDstMenu() {
     }
 }
 
-void initiateTimer() {
-    timerStartMillis = millis();
-    TIMER_RUNNING = true;
-}
-
 void displayTimer() {
-    if (TIMER_ENTERED && TIMER_RUNNING) {
-        unsigned long elapsed = pausedElapsedTime;
-        if (TIMER_RUNNING) {
-            elapsed += millis() - timerStartMillis;
-        }
-
-        int hours = elapsed / 3600000;
-        int minutes = (elapsed / 60000) % 60;
-        int seconds = (elapsed / 1000) % 60;
+    if (TIMER_ENTERED && isTimerRunning()) {
+        unsigned long elapsed = getElapsedTime();
 
         char buffer[9];
-        sprintf(buffer, "%02d:%02d:%02d", hours, minutes, seconds);
-
+        formatElapsedTime(elapsed, buffer);
         prepMenu();
         u8g2.drawStr(initialX, initialY, buffer);
         u8g2.sendBuffer();
