@@ -99,7 +99,7 @@ Settings are being stored, even after turning off the device. So you wont loose 
 ## Secrets.h
 
 your secrets file should looke something like this:  
-<pre> ```cpp
+```cpp
 #ifndef SECRETS_H
 #define SECRETS_H
 
@@ -108,6 +108,6 @@ const char* password = "12345678";
 
 
 #endif
-``` </pre>  
+```
 We would recommend to set up a hotspot with your phone for testing purposes and only put in your real credentials, once you have it up and running. That way you dont accidentially upload your wifi password to the internet.  
 The ssid is the name of your wifi, and the password is your password. Both of these are case sensitive, so make sure you spell it correctly.  
