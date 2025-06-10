@@ -23,6 +23,8 @@ Simple internet-connected clock using an ESP32 (Xiao ESP32 S3), pulling time via
 - [The Screen](#the-screen)
 - [The Pinout and Wiring Diagram](#the-pinout-and-wiring-diagram)
 - [Display layout and elements](#display-layout-and-elements)
+- [Features](#features)
+- [Secrets.h](#secretsh)
 
 ## The Idea
 
@@ -85,3 +87,28 @@ We decided on this layout, so we would have some space below the data thats bein
 The month is saved in base zero, meaning we need to get it from the RTC and then add 1 to it, in order for it to be displayed correctly
 
 <img src="images/display_layout.png" alt="Display Layout" width="512"/>  
+
+## Features
+
+The clock synchronizes the time over the internet. In the function checkWiFiAndReconnect() you can adjust, how often this should happen. The Wifi connection is done on another core, so normal timekeeping and output should not be interrupted by it. This is achieved with the [FreeRTOS](https://www.freertos.org/Documentation/00-Overview).   
+Time is being displayed in analog and digital time. The digital time can also be switched between 12 hour and 24 hour format.  
+The am and pm is being signaled by a whitebox with the letters am and pm, just over the numbers.  
+The timezones can be changed via the menu as well. Here you can choose the UTC offset, as well as if you are using DST (Daylight savings).  
+The navigation works via touch buttons. In our case, since we wanted to keep the cost of entry as low as possible, you can simply connect wires to the pins 1, 2 and 3 and touch the end of it. Antoher method would be to use a paperclip or a piece of metal and touch the pins directly.  
+Settings are being stored, even after turning off the device. So you wont loose your timezone and time format settings. This is achieved by using the [preferences](https://docs.espressif.com/projects/arduino-esp32/en/latest/tutorials/preferences.html) from the ESP32 framework.  
+
+## Secrets.h
+
+your secrets file should looke something like this:  
+```cpp
+#ifndef SECRETS_H
+#define SECRETS_H
+
+const char* ssid = "ESP32Test";
+const char* password = "12345678";
+
+
+#endif
+```
+We would recommend to set up a hotspot with your phone for testing purposes and only put in your real credentials, once you have it up and running. That way you dont accidentially upload your wifi password to the internet.  
+The ssid is the name of your wifi, and the password is your password. Both of these are case sensitive, so make sure you spell it correctly.  
