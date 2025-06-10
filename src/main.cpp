@@ -27,6 +27,7 @@ unsigned long lastEnterPress = 0;
 unsigned long lastForwardPress = 0;
 unsigned long lastBackwardPress = 0;
 
+// Configures preferences defaults, initializes display and WiFi, syncs time, and creates the initial menu.
 void setup() {
 
   //this establishes a serial connection with the PC. This makes debugging a lot easier
@@ -92,6 +93,7 @@ void setup() {
   );
 }
 
+// Main loop: updates clock display, handles debounced button input, and updates display output.
 void loop() {
   prepareClockDisplayArea();
   sendTimeToDisplayBuffer(); 
@@ -127,6 +129,7 @@ void loop() {
 
 }
 
+// FreeRTOS task: periodically checks WiFi and resynchronizes time via NTP server.
 void wifiAndTimeTask(void * parameter) { // FreeRTOS allows passing parameter to the task when created. Even though we aren't passing any parameters, this must be included because FreeRTOS expects the signature
   for (;;) { // forever loop, its the same as using while(true)
     bool connected = checkWiFiAndReconnect();

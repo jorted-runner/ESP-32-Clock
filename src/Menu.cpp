@@ -11,7 +11,14 @@
 #include <algorithm>
 #include <Arduino.h>
 
-// Establish Menu variables
+// ----------------------------------------------------------------
+// Menu option definitions and selection indices
+// mainMenuOptions: labels for each main menu item
+// tzMenuOptions: list of UTC offsets for timezone selection
+// dstMenuOptions: options for toggling Daylight Savings
+// timeFormatMenuOptions: options for 12/24 hour display format
+// Index variables track current selection in each menu context
+// ----------------------------------------------------------------
 std::vector<std::string> mainMenuOptions = {"Timezone", "Timer", "TimeFormat", "Exit"};
 std::vector<int> tzMenuOptions = {-12, -11, -10, -9, -8, -7, -6, -5, -4, -3, -2, -1, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12};
 std::vector<std::string> dstMenuOptions = {"F", "T"};
@@ -31,7 +38,7 @@ bool TIME_FORMAT_ENTERED = false;
 int initialX = 6;
 int initialY = 58;
 
-// Function to return the index of the users stored TimeZone.
+// Returns the index in tzMenuOptions matching the stored UTC offset preference.
 int getTzIndex() {
     int offSet = getUtcOffset();
 
@@ -46,20 +53,20 @@ int getTzIndex() {
     }
 }
 
-// Return the Index of users Daylight Savings Time preferences
+// Returns the stored Daylight Savings Time preference index (0 or 1).
 int getDstIndex() {
     int offSet = getDstOffset(); // Default to 0
     return offSet;
 }
 
-// Function to add Menu to display
+// Draws the initial menu title ("Menu") and underline on the display.
 void createInitialMenu() {
     u8g2.setFont(u8g2_font_profont15_tr);
     u8g2.drawStr(6, 58, "Menu");
     u8g2.drawLine(4, 60, 35, 60); // Underline Menu
 }
 
-// Function triggered when user presses "enter" button
+// Handles Enter button: enters the main menu or processes the current selection.
 void enterPressed() {
     if (!MAIN_MENU_ENTERED) { // If main menu not entered -> Display the main menu
         MAIN_MENU_ENTERED = true;
@@ -69,6 +76,7 @@ void enterPressed() {
     }
 }
 
+// Processes the selected menu item, updates user preferences, and navigates between submenus.
 void handleSelection() {
     if (DST_MENU_ENTERED) {  // If in DST menu Clock needs to be updated to reflect users new Timezone and Daylight Savings preferences
         DST_MENU_ENTERED = false;
@@ -116,7 +124,7 @@ void handleSelection() {
     }
 }
 
-// function to handle forward button press
+// Handles Forward button: moves selection forward within the active menu
 void forwardMenu() {
     if (TZ_MENU_ENTERED) { // Move forward in the Timezone menu
         if (TZ_MENU_INDEX + 1 > tzMenuOptions.size() - 1) {
@@ -151,7 +159,7 @@ void forwardMenu() {
     }
 }
 
-// Function to handle backward button press
+// Handles Backward button: moves selection backward within the active menu
 void backwardMenu() {
     if (TZ_MENU_ENTERED) { // Move backward in Timezone menu
         if (TZ_MENU_INDEX - 1 < 0) {
@@ -186,6 +194,7 @@ void backwardMenu() {
     }
 }
 
+// Renders two main menu items centered around MAIN_MENU_INDEX and underlines the selected one.
 void displayMainMenu() {
     prepMenu();
 
@@ -221,6 +230,7 @@ void displayMainMenu() {
     }
 }
 
+// Renders timezone options centered around TZ_MENU_INDEX with a "UTC:" label and underlines selection.
 void displayTimeZoneMenu() {
     prepMenu();
 
@@ -265,6 +275,7 @@ void displayTimeZoneMenu() {
     }
 }
 
+// Renders Daylight Savings toggle options and underlines the selected state.
 void displayDstMenu() {
     prepMenu();
 
@@ -301,6 +312,7 @@ void displayDstMenu() {
     }
 }
 
+// Displays the running timer (HH:MM:SS) if the timer is active.
 void displayTimer() {
     if (TIMER_ENTERED && isTimerRunning()) {
         unsigned long elapsed = getElapsedTime();
@@ -313,6 +325,7 @@ void displayTimer() {
     }
 }
 
+// Renders time format options ("12 hour", "24 hour") and underlines the selected format.
 void displayTimeFormatMenu() {
     prepMenu();
     int x = initialX;
@@ -335,6 +348,7 @@ void displayTimeFormatMenu() {
     }
 }
 
+// Clears the bottom portion of the display buffer where menu text is drawn.
 void clearPreviousMenuText() {
     u8g2.setDrawColor(0);
     // x, y, w, h
@@ -342,6 +356,7 @@ void clearPreviousMenuText() {
     u8g2.setDrawColor(1);
 }
 
+// Prepares display settings: selects the font and clears previous menu area for redrawing.
 void prepMenu() {
     u8g2.setFont(u8g2_font_profont10_tr);
     clearPreviousMenuText();
