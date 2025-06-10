@@ -10,7 +10,7 @@ static const unsigned char image_cross_small_bits[] = {0x00,0x00,0x00,0x00,0x00,
 void createInitialMenu();
 void enterPressed();
 void handleSelection();
-void displayMenu();
+void displayMainMenu();
 void forwardMenu();
 void backwardMenu();
 void clearPreviousMenuText();
@@ -22,3 +22,4 @@ void initiateTimer();
 void displayTimer();
 void displayTimeFormatMenu();
 bool getTimeFormat();
+void prepMenu();

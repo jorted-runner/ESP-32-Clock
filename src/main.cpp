@@ -8,6 +8,7 @@
 #include "Secrets.h"
 #include "Menu.h"
 #include "PreferencesGlobals.h"
+#include "PrefUtils.h"
 
 Preferences clockPrefs;
 
@@ -26,28 +27,23 @@ unsigned long lastEnterPress = 0;
 unsigned long lastForwardPress = 0;
 unsigned long lastBackwardPress = 0;
 
+// Configures preferences defaults, initializes display and WiFi, syncs time, and creates the initial menu.
 void setup() {
 
   //this establishes a serial connection with the PC. This makes debugging a lot easier
   Serial.begin(115200);
 
-  clockPrefs.begin("clockPrefs", RO_MODE);
-
-  bool tpInit = clockPrefs.isKey("nvsInit");
+  bool tpInit = checkKeyExists("nvsInit");
 
   if (tpInit == false) {
-    clockPrefs.end();
-    clockPrefs.begin("clockPrefs", RW_MODE);
 
-    clockPrefs.putInt("utcOff", 0);
-    clockPrefs.putInt("dstOff", 0);
+    setIntPref("utcOff", 0);
+    setIntPref("dstOff", 0);
 
-    clockPrefs.putBool("24hour", true);
+    setBoolPref("24hour", true);
 
-    clockPrefs.putBool("nvsInit", true);
+    setBoolPref("nvsInit", true);
 
-    clockPrefs.end();
-    clockPrefs.begin("clockPrefs", RO_MODE);
   }
 
   //Init the TZ_index
@@ -74,12 +70,12 @@ void setup() {
   // Connect to WiFi using the WiFiManager module  
   connectToWiFi(ssid, password);
 
-  //this gets the time from the API
   //utcOffset is set to 0 at the start, it is there to set your timezone
   //dstOffset is also set to 0, it defines whether or not there is daylight savings time observed
-  int utcOffset = clockPrefs.getInt("utcOff", 0) * 3600;
-  int dstOffset = clockPrefs.getInt("dstOff", 0) * 3600;
-  clockPrefs.end();
+  int utcOffset = getUtcOffsetInSeconds();
+  int dstOffset = getDstOffsetInSeconds();
+
+  //this gets the time from the API
   configTime(utcOffset, dstOffset, NTP_SERVER);
 
   createInitialMenu();
@@ -97,6 +93,7 @@ void setup() {
   );
 }
 
+// Main loop: updates clock display, handles debounced button input, and updates display output.
 void loop() {
   prepareClockDisplayArea();
   sendTimeToDisplayBuffer(); 
@@ -132,6 +129,7 @@ void loop() {
 
 }
 
+// FreeRTOS task: periodically checks WiFi and resynchronizes time via NTP server.
 void wifiAndTimeTask(void * parameter) { // FreeRTOS allows passing parameter to the task when created. Even though we aren't passing any parameters, this must be included because FreeRTOS expects the signature
   for (;;) { // forever loop, its the same as using while(true)
     bool connected = checkWiFiAndReconnect();
@@ -139,10 +137,8 @@ void wifiAndTimeTask(void * parameter) { // FreeRTOS allows passing parameter to
 
     // if the wifi is connected, call the api to update the time
     if (connected) {
-      clockPrefs.begin("clockPrefs", false);
-      int utcOffset = clockPrefs.getInt("utcOff", 0) * 3600;
-      int dstOffset = clockPrefs.getInt("dstOff", 0) * 3600;
-      clockPrefs.end();
+      int utcOffset = getUtcOffsetInSeconds();
+      int dstOffset = getDstOffsetInSeconds();
       configTime(utcOffset, dstOffset, NTP_SERVER);
       Serial.println("\nTime synced");
     }
