@@ -24,6 +24,7 @@ Simple internet-connected clock using an ESP32 (Xiao ESP32 S3), pulling time via
 - [The Pinout and Wiring Diagram](#the-pinout-and-wiring-diagram)
 - [Display layout and elements](#display-layout-and-elements)
 - [Features](#features)
+- [Secrets.h](#secretsh)
 
 ## The Idea
 
