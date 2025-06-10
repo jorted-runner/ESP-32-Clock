@@ -90,12 +90,12 @@ The month is saved in base zero, meaning we need to get it from the RTC and then
 
 ## Features
 
-The clock synchronizes the time over the internet. In the function checkWiFiAndReconnect() you can adjust, how often this should happen.  
+The clock synchronizes the time over the internet. In the function checkWiFiAndReconnect() you can adjust, how often this should happen. The Wifi connection is done on another core, so normal timekeeping and output should not be interrupted by it. This is achieved with the [FreeRTOS](https://www.freertos.org/Documentation/00-Overview).   
 Time is being displayed in analog and digital time. The digital time can also be switched between 12 hour and 24 hour format.  
 The am and pm is being signaled by a whitebox with the letters am and pm, just over the numbers.  
 The timezones can be changed via the menu as well. Here you can choose the UTC offset, as well as if you are using DST (Daylight savings).  
 The navigation works via touch buttons. In our case, since we wanted to keep the cost of entry as low as possible, you can simply connect wires to the pins 1, 2 and 3 and touch the end of it. Antoher method would be to use a paperclip or a piece of metal and touch the pins directly.  
-Settings are being stored, even after turning off the device. So you wont loose your timezone and time format settings. This is achieved by using the preferences from the ESP32 framework.  
+Settings are being stored, even after turning off the device. So you wont loose your timezone and time format settings. This is achieved by using the [preferences](https://docs.espressif.com/projects/arduino-esp32/en/latest/tutorials/preferences.html) from the ESP32 framework.  
 
 ## Secrets.h
 
