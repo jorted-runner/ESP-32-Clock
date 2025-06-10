@@ -59,10 +59,14 @@ void sendTimeToDisplayBuffer(){
     if (clockPrefs.getBool("24hour", true)){
 
     } else {
+        u8g2.setDrawColor(2);
+        u8g2.setFont(u8g2_font_4x6_tr);
+        u8g2.drawStr(66, 5, "AM");
+        u8g2.drawStr(102, 5, "PM");
         if (timeinfo.tm_hour <=12){
-        u8g2.drawFrame(59, 0, 58, 5);
+        u8g2.drawBox(62, 0, 15, 5);
         } else {
-            u8g2.drawBox(59, 0, 58, 5);
+            u8g2.drawBox(98, 0, 15, 5);
         }
     }
     clockPrefs.end();
