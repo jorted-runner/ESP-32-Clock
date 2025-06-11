@@ -18,6 +18,7 @@ Simple internet-connected clock using an ESP32 (Xiao ESP32 S3), pulling time via
 ## Table of Contents
 
 - [The Idea](#the-idea)
+- [Demo Video](#demo)
 - [Installation](#installation)
 - [The Xiao ESP32](#the-xiao-esp32)
 - [The Screen](#the-screen)
@@ -25,6 +26,10 @@ Simple internet-connected clock using an ESP32 (Xiao ESP32 S3), pulling time via
 - [Display layout and elements](#display-layout-and-elements)
 - [Features](#features)
 - [Secrets.h](#secretsh)
+
+## Demo
+This video is a demo of the finished clock and a run through of the code with a brief explanation of how it works.
+[![Watch the video](https://img.youtube.com/vi/TspNAc2Md3g/0.jpg)](https://www.youtube.com/watch?v=TspNAc2Md3g)
 
 ## The Idea
 
